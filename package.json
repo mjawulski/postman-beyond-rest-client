@@ -4,7 +4,7 @@
   "description": "Examples of how to integrate POSTMAN with CI/CD",
   "main": "index.js",
   "scripts": {
-    "newman": "newman run collection.json -e prod.postman_environment.json"
+    "e2e": "newman run collection.json -e prod.postman_environment.json"
   },
   "author": "",
   "license": "ISC",

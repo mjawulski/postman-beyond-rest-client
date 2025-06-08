@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "8ae98bed-c1f0-451b-b345-84705d319953",
+		"name": "Postman: Beyond Rest Client CICD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44929464"
+	},
+	"item": [
+		{
+			"name": "dummyjson.com",
+			"item": [
+				{
+					"name": "/products",
+					"item": [
+						{
+							"name": "00. Get Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonResponse = pm.response.json();\r",
+											"const accessToken = jsonResponse.accessToken;\r",
+											"\r",
+											"if(!accessToken){\r",
+											"    throw Error(\"No token in response!\")\r",
+											"}\r",
+											"pm.environment.set(\"access_token\", accessToken);\r",
+											"\r",
+											"pm.test('It returns access token',()=>{\r",
+											"    pm.expect(pm.response.json().accessToken).exist;\r",
+											"})\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"expiresInMins\": 30\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiUrl}}/auth/login",
+									"host": [
+										"{{apiUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/category",
+							"item": [
+								{
+									"name": "/category/{name}",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const Ajv = require('ajv');\r",
+													"const ajv = new Ajv({ allErrors: true });\r",
+													"\r",
+													"const schema = {\r",
+													"  type: \"object\",\r",
+													"  required: [\"products\", \"total\", \"skip\", \"limit\"],\r",
+													"  properties: {\r",
+													"    products: {\r",
+													"      type: \"array\",\r",
+													"      items: {\r",
+													"        type: \"object\",\r",
+													"        required: [\r",
+													"          \"id\", \"title\", \"description\", \"category\", \"price\", \"discountPercentage\",\r",
+													"          \"rating\", \"stock\", \"tags\", \"brand\", \"sku\", \"weight\", \"dimensions\",\r",
+													"          \"warrantyInformation\", \"shippingInformation\", \"availabilityStatus\", \"reviews\",\r",
+													"          \"returnPolicy\", \"minimumOrderQuantity\", \"meta\", \"images\", \"thumbnail\"\r",
+													"        ],\r",
+													"        properties: {\r",
+													"          id: { type: \"integer\" },\r",
+													"          title: { type: \"string\" },\r",
+													"          description: { type: \"string\" },\r",
+													"          category: { type: \"string\" },\r",
+													"          price: { type: \"number\" },\r",
+													"          discountPercentage: { type: \"number\" },\r",
+													"          rating: { type: \"number\" },\r",
+													"          stock: { type: \"integer\" },\r",
+													"          tags: {\r",
+													"            type: \"array\",\r",
+													"            items: { type: \"string\" }\r",
+													"          },\r",
+													"          brand: { type: \"string\" },\r",
+													"          sku: { type: \"string\" },\r",
+													"          weight: { type: \"number\" },\r",
+													"          dimensions: {\r",
+													"            type: \"object\",\r",
+													"            required: [\"width\", \"height\", \"depth\"],\r",
+													"            properties: {\r",
+													"              width: { type: \"number\" },\r",
+													"              height: { type: \"number\" },\r",
+													"              depth: { type: \"number\" }\r",
+													"            }\r",
+													"          },\r",
+													"          warrantyInformation: { type: \"string\" },\r",
+													"          shippingInformation: { type: \"string\" },\r",
+													"          availabilityStatus: { type: \"string\" },\r",
+													"          reviews: {\r",
+													"            type: \"array\",\r",
+													"            items: {\r",
+													"              type: \"object\",\r",
+													"              required: [\"rating\", \"comment\", \"date\", \"reviewerName\", \"reviewerEmail\"],\r",
+													"              properties: {\r",
+													"                rating: { type: \"integer\" },\r",
+													"                comment: { type: \"string\" },\r",
+													"                date: { type: \"string\", format: \"date-time\" },\r",
+													"                reviewerName: { type: \"string\" },\r",
+													"                reviewerEmail: { type: \"string\", format: \"email\" }\r",
+													"              }\r",
+													"            }\r",
+													"          },\r",
+													"          returnPolicy: { type: \"string\" },\r",
+													"          minimumOrderQuantity: { type: \"integer\" },\r",
+													"          meta: {\r",
+													"            type: \"object\",\r",
+													"            required: [\"createdAt\", \"updatedAt\", \"barcode\", \"qrCode\"],\r",
+													"            properties: {\r",
+													"              createdAt: { type: \"string\", format: \"date-time\" },\r",
+													"              updatedAt: { type: \"string\", format: \"date-time\" },\r",
+													"              barcode: { type: \"string\" },\r",
+													"              qrCode: { type: \"string\", format: \"uri\" }\r",
+													"            }\r",
+													"          },\r",
+													"          images: {\r",
+													"            type: \"array\",\r",
+													"            items: { type: \"string\", format: \"uri\" }\r",
+													"          },\r",
+													"          thumbnail: { type: \"string\", format: \"uri\" }\r",
+													"        }\r",
+													"      }\r",
+													"    },\r",
+													"    total: { type: \"integer\" },\r",
+													"    skip: { type: \"integer\" },\r",
+													"    limit: { type: \"integer\" }\r",
+													"  }\r",
+													"};\r",
+													"\r",
+													"const res = pm.response.json();\r",
+													"const validate = ajv.compile(schema);\r",
+													"const valid = validate(res);\r",
+													"\r",
+													"pm.test(\"Response matches JSON Schema\", () => {\r",
+													"  pm.expect(valid,  JSON.stringify(validate.errors, null, 2)).to.be.true;\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response returns 200 code\",()=>{\r",
+													"    pm.expect(pm.response.code).to.equal(200)\r",
+													"})\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{access_token}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{apiUrl}}/auth/products/category/beauty",
+											"host": [
+												"{{apiUrl}}"
+											],
+											"path": [
+												"auth",
+												"products",
+												"category",
+												"beauty"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/category/{invalid_name}",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response returns 404 code\",()=>{\r",
+													"    pm.expect(pm.response.code).to.equal(404)\r",
+													"})\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{access_token}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{apiUrl}}/auth/products/category/!234/dsf",
+											"host": [
+												"{{apiUrl}}"
+											],
+											"path": [
+												"auth",
+												"products",
+												"category",
+												"!234",
+												"dsf"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "/categories",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const Ajv = require('ajv');\r",
+											"const ajv = new Ajv({ allErrors: true });\r",
+											"\r",
+											"const response = pm.response.json();\r",
+											"\r",
+											"const schema = {\r",
+											"  type: \"array\",\r",
+											"  items: {\r",
+											"    type: \"object\",\r",
+											"    properties: {\r",
+											"        slug: {\r",
+											"            type: \"string\"\r",
+											"        },\r",
+											"        name: {\r",
+											"            type: \"string\"\r",
+											"        },\r",
+											"        url: {\r",
+											"            type: \"string\"\r",
+											"        }\r",
+											"    },\r",
+											"    required: [\"slug\", \"name\", \"url\"],\r",
+											"  }\r",
+											"}\r",
+											"pm.test(\"Response matches JSON Schema\", () => {\r",
+											"    const validate = ajv.compile(schema);\r",
+											"    const valid = validate(response);\r",
+											"\r",
+											"    pm.expect(valid).to.be.true;\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiUrl}}/products/categories",
+									"host": [
+										"{{apiUrl}}"
+									],
+									"path": [
+										"products",
+										"categories"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Requesty do testowania dummy json"
+		}
+	]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "postman-beyond-rest-client-examples",
+  "version": "1.0.0",
+  "description": "Examples of how to integrate POSTMAN with CI/CD",
+  "main": "index.js",
+  "scripts": {
+    "newman": "newman run collection.json -e prod.postman_environment.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^6.2.1"
+  }
+}
